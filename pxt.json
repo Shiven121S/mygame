@@ -9,10 +9,9 @@
         "Timers": "github:microsoft/arcade-timers#v1.1.0",
         "settings-blocks": "github:microsoft/pxt-settings-blocks#v1.0.0",
         "pxt-status-bar": "github:jwunderl/pxt-status-bar#v0.4.0",
-        "Color Fading": "github:jwunderl/pxt-color#v0.2.0",
         "animation": "*",
-        "character-animations": "github:riknoll/character-animations#v0.3.0",
-        "block-menu": "github:riknoll/arcade-custom-menu#v0.0.1"
+        "block-menu": "github:riknoll/arcade-custom-menu#v0.0.1",
+        "Color Fading": "github:jwunderl/pxt-color#v0.2.0"
     },
     "files": [
         "main.blocks",
@@ -32,5 +31,5 @@
     "supportedTargets": [
         "arcade"
     ],
-    "preferredEditor": "tsprj"
+    "preferredEditor": "blocksprj"
 }
