@@ -59,27 +59,16 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Crate, function (sprite, otherSp
     timer.after(50, function () {
         if (Math.percentChance(25)) {
             info.changeScoreBy(10)
-            textSprite3 = textsprite.create("+10 Points", 15, 3)
-            textSprite3.setFlag(SpriteFlag.RelativeToCamera, true)
         } else if (Math.percentChance(25)) {
             Ammo += 5
             if (Ammo > 20) {
                 Ammo = 20
             }
-            textSprite3 = textsprite.create("+5 Ammo", 15, 3)
-            textSprite3.setFlag(SpriteFlag.RelativeToCamera, true)
         } else if (Math.percentChance(25)) {
             statusbar.value += 5
-            textSprite3 = textsprite.create("+5 Health", 15, 3)
-            textSprite3.setFlag(SpriteFlag.RelativeToCamera, true)
         } else if (Math.percentChance(25)) {
             info.changeScoreBy(15)
-            textSprite3 = textsprite.create("+15 Points", 15, 3)
-            textSprite3.setFlag(SpriteFlag.RelativeToCamera, true)
         }
-        timer.after(500, function () {
-            textSprite3.destroy()
-        })
     })
 })
 sprites.onOverlap(SpriteKind.Player, SpriteKind.BasicEnemy, function (sprite, otherSprite) {
@@ -92,7 +81,7 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.BasicEnemy, function (sprite, ot
     })
 })
 function Crate_maker () {
-    if (Math.percentChance(50)) {
+    if (Math.percentChance(75)) {
         Reward_Crate = sprites.create(img`
             . . . . . . . . . . . . . . . . 
             . . . . . . . . . . . . . . . . 
@@ -305,6 +294,7 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
                         false
                         )
                     }
+                    music.playTone(147, music.beat(BeatFraction.Half))
                     projectile = sprites.createProjectileFromSprite(img`
                         . . . . . . . . . . . . . . . . 
                         . . . . . . . . . . . . . . . . 
@@ -779,26 +769,7 @@ blockMenu.onMenuOptionSelected(function (option, index) {
                 . . . 5 f f f f f f f f 5 . . . 
                 . . . 5 5 5 5 5 5 5 5 5 5 . . . 
                 `, SpriteKind.Player)
-            Camera = sprites.create(img`
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                `, SpriteKind.Player)
-            Camera.follow(mySprite, 80)
-            scene.cameraFollowSprite(Camera)
+            scene.cameraFollowSprite(mySprite)
             mySprite.ay = 250
             controller.moveSprite(mySprite, 100, 0)
             Map_maker()
@@ -826,7 +797,7 @@ blockMenu.onMenuOptionSelected(function (option, index) {
             9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 
             `)
         game.setDialogTextColor(9)
-        game.showLongText("AD or LEFT and RIGHT ARROW KEYS to move left and right. W or UP KEY to jump. S or DOWN ARROW to crouch. SPACE or Z to shoot. Shooting enemies will give you 2 points. Crates can give you health, points, or ammunition. 5 = 1 unit (in-game-currency).", DialogLayout.Full)
+        game.showLongText("AD or LEFT and RIGHT ARROW KEYS to move left and right. W or UP KEY to jump. S or DOWN ARROW to crouch. SPACE or Z to shoot. Shooting enemies will give you 2 points. Crates can give you health, points, or ammunition. 5 points = 1 unit (in-game-currency).", DialogLayout.Full)
     }
 })
 function Enemy_Maker () {
@@ -853,13 +824,11 @@ function Enemy_Maker () {
     mySprite.lifespan = 10000
 }
 let Basic_Enemy: Sprite = null
-let Camera: Sprite = null
 let textSprite2: Sprite = null
 let projectile: Sprite = null
 let Reward_Crate: Sprite = null
 let statusbar: StatusBarSprite = null
 let Ammo = 0
-let textSprite3: TextSprite = null
 let mySprite: Sprite = null
 let Direction = ""
 let textSprite: Sprite = null
@@ -867,7 +836,7 @@ let gameStarted = false
 let Crouch = false
 let Delay_Actived = false
 let Delay = 0
-Delay = 750
+Delay = 250
 Delay_Actived = false
 Crouch = false
 gameStarted = false
@@ -878,7 +847,7 @@ blockMenu.setColors(9, 15)
 game.onUpdate(function () {
     if (gameStarted) {
         textSprite2.destroy()
-        textSprite2 = textsprite.create("" + Ammo + " / 20", 1, 8)
+        textSprite2 = textsprite.create("" + Ammo + " | 20", 1, 8)
         textSprite2.setFlag(SpriteFlag.RelativeToCamera, true)
         textSprite2.setPosition(21, 20)
     }
