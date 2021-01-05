@@ -1,5 +1,5 @@
 {
-    "name": "MyGame",
+    "name": "myGame",
     "version": "0.0.1",
     "description": "",
     "dependencies": {
@@ -12,7 +12,8 @@
         "animation": "*",
         "block-menu": "github:riknoll/arcade-custom-menu#v0.0.1",
         "Color Fading": "github:jwunderl/pxt-color#v0.2.0",
-        "controller": "*"
+        "controller": "*",
+        "arcade-sprite-data": "github:microsoft/arcade-sprite-data#v0.1.0"
     },
     "files": [
         "main.blocks",
