@@ -143,9 +143,6 @@ function Crate_maker () {
         `, SpriteKind.Crate)
     tiles.placeOnTile(Reward_Crate, tiles.getTileLocation(randint(0, 44), 0))
     Reward_Crate.setVelocity(0, 60)
-    timer.after(9000, function () {
-        Reward_Crate.destroy()
-    })
 }
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     if (gameStarted) {
@@ -478,9 +475,60 @@ function Map_maker () {
     }
     tiles.placeOnRandomTile(mySprite, myTiles.transparency16)
 }
+sprites.onOverlap(SpriteKind.AiEnemy, SpriteKind.BasicEnemy, function (sprite, otherSprite) {
+    tiles.placeOnTile(sprite, tiles.getTileLocation(randint(0, 44), 0))
+    sprite.setVelocity(0, 202)
+})
+sprites.onOverlap(SpriteKind.BasicEnemy, SpriteKind.Crate, function (sprite, otherSprite) {
+    tiles.placeOnTile(sprite, tiles.getTileLocation(randint(0, 44), 0))
+    sprite.setVelocity(0, 202)
+})
+sprites.onOverlap(SpriteKind.Projectile, SpriteKind.AiEnemy, function (sprite, otherSprite) {
+    scene.cameraShake(6, 500)
+    timer.background(function () {
+        otherSprite.destroy(effects.disintegrate, 500)
+    })
+    timer.after(50, function () {
+        info.changeScoreBy(4)
+    })
+})
 sprites.onOverlap(SpriteKind.BasicEnemy, SpriteKind.BasicEnemy, function (sprite, otherSprite) {
     tiles.placeOnTile(sprite, tiles.getTileLocation(randint(0, 44), 0))
     sprite.setVelocity(0, 202)
+})
+// //  while Game_Over == False:
+// timer.after(50, function follow() {
+// console.log("on_background3")
+// //  while Game_Over == False:
+// // console.log("Inside while")
+// if (mySprite.x > sprite.x) {
+// sprite.vx = 65
+// } else if (mySprite.x < sprite.x) {
+// sprite.vx = -65
+// } else if (mySprite.y > sprite.y) {
+// sprite.vy = 60
+// } else if (mySprite.y < sprite.y) {
+// sprite.vy = -60
+// } else {
+// sprite.vx = 0
+// sprite.vy = 0
+// }
+// })
+sprites.onCreated(SpriteKind.AiEnemy, function (sprite) {
+    forever(function() {
+        if (mySprite.x > sprite.x-4) {
+            sprite.vx = 40
+        } else if (mySprite.x < sprite.x-4) {
+            sprite.vx = -40
+        } else if (mySprite.y > sprite.y) {
+            sprite.vy = 40
+        } else if (mySprite.y < sprite.y) {
+            sprite.vy = -40
+        } else {
+            sprite.vx = 0
+            sprite.vy = 0
+        }
+    })
 })
 controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
     Direction = "r"
@@ -569,7 +617,17 @@ controller.down.onEvent(ControllerButtonEvent.Pressed, function () {
 info.onLifeZero(function () {
     if (gameStarted) {
         game.over(false, color.FadeToWhite)
+        Game_Over = true
     }
+})
+sprites.onOverlap(SpriteKind.Player, SpriteKind.AiEnemy, function (sprite, otherSprite) {
+    scene.cameraShake(6, 500)
+    timer.background(function () {
+        otherSprite.destroy(effects.disintegrate, 500)
+    })
+    timer.after(50, function () {
+        statusbar.value += -15
+    })
 })
 sprites.onOverlap(SpriteKind.Projectile, SpriteKind.BasicEnemy, function (sprite, otherSprite) {
     scene.cameraShake(4, 500)
@@ -579,6 +637,10 @@ sprites.onOverlap(SpriteKind.Projectile, SpriteKind.BasicEnemy, function (sprite
     timer.after(50, function () {
         info.changeScoreBy(2)
     })
+})
+sprites.onOverlap(SpriteKind.AiEnemy, SpriteKind.AiEnemy, function (sprite, otherSprite) {
+    tiles.placeOnTile(sprite, tiles.getTileLocation(randint(0, 44), 0))
+    sprite.setVelocity(0, 202)
 })
 blockMenu.onMenuOptionSelected(function (option, index) {
     if (option == "PLAY") {
@@ -641,55 +703,87 @@ blockMenu.onMenuOptionSelected(function (option, index) {
             9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 
             `)
         game.setDialogTextColor(9)
-        game.showLongText("AD or LEFT and RIGHT ARROW KEYS to move left and right. W or UP KEY to jump. S or DOWN ARROW to crouch. SPACE or Z to shoot. Shooting enemies will give you 2 points. Crates can give you health, points, or ammunition. 5 points = 1 unit (in-game-currency).", DialogLayout.Full)
+        game.showLongText("AD or LEFT and RIGHT ARROW KEYS to move left and right. W or UP KEY to jump. S or DOWN ARROW to crouch. Crouching will increase your speed, but you cannot shoot or jump. SPACE or Z to shoot. Shooting enemies will give you 2 points. Crates can give you health, points, or ammunition. Touching basic enemies (purple) will reduce some off your health. There are also Enhanced Enemies (green). These enhanced enemies will follow you. Touching them will reduce some of your health.", DialogLayout.Full)
     }
 })
+sprites.onOverlap(SpriteKind.AiEnemy, SpriteKind.Crate, function (sprite, otherSprite) {
+    tiles.placeOnTile(sprite, tiles.getTileLocation(randint(0, 44), 0))
+    sprite.setVelocity(0, 202)
+})
 function Enemy_Maker () {
-    Basic_Enemy = sprites.create(img`
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . 2 2 2 2 2 2 2 2 2 2 . . . 
-        . . . 2 f f f f f f f f 2 . . . 
-        . . . 2 f f f f f f f f 2 . . . 
-        . . . 2 f f f f f f f f 2 . . . 
-        . . . 2 f f f f f f f f 2 . . . 
-        . . . 2 f f f f f f f f 2 . . . 
-        . . . 2 f f f f f f f f 2 . . . 
-        . . . 2 f f f f f f f f 2 . . . 
-        . . . 2 f f f f f f f f 2 . . . 
-        . . . 2 2 2 2 2 2 2 2 2 2 . . . 
-        `, SpriteKind.BasicEnemy)
-    tiles.placeOnTile(Basic_Enemy, tiles.getTileLocation(randint(0, 44), 0))
-    Basic_Enemy.setVelocity(0, 202)
-    timer.after(10000, function () {
-        Basic_Enemy.destroy()
-    })
+    if (Math.percentChance(99)) {
+        AI_enemy = sprites.create(img`
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . 7 7 7 7 7 7 7 7 7 7 . . . 
+            . . . 7 f f f f f f f f 7 . . . 
+            . . . 7 f f f f f f f f 7 . . . 
+            . . . 7 f f f f f f f f 7 . . . 
+            . . . 7 f f f f f f f f 7 . . . 
+            . . . 7 f f f f f f f f 7 . . . 
+            . . . 7 f f f f f f f f 7 . . . 
+            . . . 7 f f f f f f f f 7 . . . 
+            . . . 7 f f f f f f f f 7 . . . 
+            . . . 7 7 7 7 7 7 7 7 7 7 . . . 
+            `, SpriteKind.AiEnemy)
+        tiles.placeOnTile(AI_enemy, tiles.getTileLocation(randint(0, 44), 0))
+        AI_enemy.setVelocity(0, 60)
+    } else if (Math.percentChance(75)) {
+        Basic_Enemy = sprites.create(img`
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . a a a a a a a a a a . . . 
+            . . . a f f f f f f f f a . . . 
+            . . . a f f f f f f f f a . . . 
+            . . . a f f f f f f f f a . . . 
+            . . . a f f f f f f f f a . . . 
+            . . . a f f f f f f f f a . . . 
+            . . . a f f f f f f f f a . . . 
+            . . . a f f f f f f f f a . . . 
+            . . . a f f f f f f f f a . . . 
+            . . . a a a a a a a a a a . . . 
+            `, SpriteKind.BasicEnemy)
+        tiles.placeOnTile(Basic_Enemy, tiles.getTileLocation(randint(0, 44), 0))
+        Basic_Enemy.setVelocity(0, 202)
+    }
 }
 let Basic_Enemy: Sprite = null
+let AI_enemy: Sprite = null
 let textSprite2: Sprite = null
 let projectile: Sprite = null
 let Reward_Crate: Sprite = null
 let statusbar: StatusBarSprite = null
 let Ammo = 0
-let mySprite: Sprite = null
 let Direction = ""
-let textSprite: Sprite = null
+let textSprite: TextSprite = null
 let gameStarted = false
 let Crouch = false
 let Delay_Actived = false
 let Delay = 0
+let Game_Over = false
+let mySprite : Sprite = null
+Game_Over = false
 Delay = 0
 Delay_Actived = false
 Crouch = false
 gameStarted = false
 blockMenu.showMenu(["PLAY", "INFORMATION"], MenuStyle.List, MenuLocation.BottomHalf)
-textSprite = textsprite.create("GAME", 0, 9)
-textSprite.setPosition(80, 15)
+textSprite = textsprite.create("NEONITE", 0, 9)
+textSprite.setPosition(45, 15)
 blockMenu.setColors(9, 15)
+game.onUpdate(function () {
+    if (!(gameStarted)) {
+        textSprite.setMaxFontHeight(12)
+    }
+})
 game.onUpdate(function () {
     if (gameStarted) {
         textSprite2.destroy()
@@ -727,12 +821,12 @@ game.onUpdate(function () {
         color.setColor(1, color.rgb(0, 0, 0))
     }
 })
-game.onUpdateInterval(2000, function () {
+game.onUpdateInterval(5000, function () {
     if (gameStarted) {
         Crate_maker()
     }
 })
-game.onUpdateInterval(2000, function () {
+game.onUpdateInterval(3500, function () {
     if (gameStarted) {
         Enemy_Maker()
     }
