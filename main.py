@@ -638,9 +638,19 @@ sprites.onOverlap(SpriteKind.Projectile, SpriteKind.BasicEnemy, function (sprite
         info.changeScoreBy(2)
     })
 })
+sprites.onCreated(SpriteKind.BasicEnemy, function (sprite) {
+    timer.after(10000, function () {
+        sprite.destroy()
+    })
+})
 sprites.onOverlap(SpriteKind.AiEnemy, SpriteKind.AiEnemy, function (sprite, otherSprite) {
     tiles.placeOnTile(sprite, tiles.getTileLocation(randint(0, 44), 0))
     sprite.setVelocity(0, 202)
+})
+sprites.onCreated(SpriteKind.Crate, function (sprite) {
+    timer.after(15000, function () {
+        sprite.destroy()
+    })
 })
 blockMenu.onMenuOptionSelected(function (option, index) {
     if (option == "PLAY") {
@@ -711,7 +721,7 @@ sprites.onOverlap(SpriteKind.AiEnemy, SpriteKind.Crate, function (sprite, otherS
     sprite.setVelocity(0, 202)
 })
 function Enemy_Maker () {
-    if (Math.percentChance(99)) {
+    if (Math.percentChance(0)) {
         AI_enemy = sprites.create(img`
             . . . . . . . . . . . . . . . . 
             . . . . . . . . . . . . . . . . 
@@ -731,7 +741,8 @@ function Enemy_Maker () {
             . . . 7 7 7 7 7 7 7 7 7 7 . . . 
             `, SpriteKind.AiEnemy)
         tiles.placeOnTile(AI_enemy, tiles.getTileLocation(randint(0, 44), 0))
-    } else if (Math.percentChance(75)) {
+        AI_enemy.setVelocity(0, 60)
+    } else if (Math.percentChance(100)) {
         Basic_Enemy = sprites.create(img`
             . . . . . . . . . . . . . . . . 
             . . . . . . . . . . . . . . . . 

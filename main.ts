@@ -119,7 +119,7 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.BasicEnemy, function (sprite, ot
         otherSprite.destroy(effects.disintegrate, 500)
     })
     timer.after(50, function () {
-        statusbar.value += -10
+        statusbar.value += -15
     })
 })
 function Crate_maker () {
@@ -529,6 +529,11 @@ sprites.onCreated(SpriteKind.AiEnemy, function (sprite) {
             sprite.vy = 0
         }
     })
+timer.background(function () {
+        timer.after(10000, function () {
+            sprite.destroy()
+        })
+    })
 })
 controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
     Direction = "r"
@@ -616,6 +621,10 @@ controller.down.onEvent(ControllerButtonEvent.Pressed, function () {
 })
 info.onLifeZero(function () {
     if (gameStarted) {
+        blockSettings.writeNumber("Total Points", blockSettings.readNumber("Total Points") + info.score())
+        timer.after(10, function () {
+            Total_Points = blockSettings.readNumber("Total Points")
+        })
         game.over(false, color.FadeToWhite)
         Game_Over = true
     }
@@ -626,7 +635,7 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.AiEnemy, function (sprite, other
         otherSprite.destroy(effects.disintegrate, 500)
     })
     timer.after(50, function () {
-        statusbar.value += -15
+        statusbar.value += -20
     })
 })
 sprites.onOverlap(SpriteKind.Projectile, SpriteKind.BasicEnemy, function (sprite, otherSprite) {
@@ -638,9 +647,19 @@ sprites.onOverlap(SpriteKind.Projectile, SpriteKind.BasicEnemy, function (sprite
         info.changeScoreBy(2)
     })
 })
+sprites.onCreated(SpriteKind.BasicEnemy, function (sprite) {
+    timer.after(10000, function () {
+        sprite.destroy()
+    })
+})
 sprites.onOverlap(SpriteKind.AiEnemy, SpriteKind.AiEnemy, function (sprite, otherSprite) {
     tiles.placeOnTile(sprite, tiles.getTileLocation(randint(0, 44), 0))
     sprite.setVelocity(0, 202)
+})
+sprites.onCreated(SpriteKind.Crate, function (sprite) {
+    timer.after(15000, function () {
+        sprite.destroy()
+    })
 })
 blockMenu.onMenuOptionSelected(function (option, index) {
     if (option == "PLAY") {
@@ -704,6 +723,28 @@ blockMenu.onMenuOptionSelected(function (option, index) {
             `)
         game.setDialogTextColor(9)
         game.showLongText("AD or LEFT and RIGHT ARROW KEYS to move left and right. W or UP KEY to jump. S or DOWN ARROW to crouch. Crouching will increase your speed, but you cannot shoot or jump. SPACE or Z to shoot. Shooting enemies will give you 2 points. Crates can give you health, points, or ammunition. Touching basic enemies (purple) will reduce some off your health. There are also Enhanced Enemies (green). These enhanced enemies will follow you. Touching them will reduce some of your health.", DialogLayout.Full)
+    } else if (option == "CURRENT CURRENCY") {
+        game.setDialogFrame(img`
+            9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 
+            9 f f f f f f f f f f f f f 9 
+            9 f f f f f f f f f f f f f 9 
+            9 f f f f f f f f f f f f f 9 
+            9 f f f f f f f f f f f f f 9 
+            9 f f f f f f f f f f f f f 9 
+            9 f f f f f f f f f f f f f 9 
+            9 f f f f f f f f f f f f f 9 
+            9 f f f f f f f f f f f f f 9 
+            9 f f f f f f f f f f f f f 9 
+            9 f f f f f f f f f f f f f 9 
+            9 f f f f f f f f f f f f f 9 
+            9 f f f f f f f f f f f f f 9 
+            9 f f f f f f f f f f f f f 9 
+            9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 
+            `)
+        game.setDialogTextColor(9)
+        game.showLongText(convertToText(InGamePoints), DialogLayout.Center)
+    } else if (option == "STORE") {
+        blockMenu.showMenu(["EXTRA MAXIMUM BULLETS - 20 Units)", "EXTRA JUMP - (30 Units)", "EXTRA SPEED - (35 Units)", "EXTRA HEALTH - (40 Units)"], MenuStyle.List, MenuLocation.FullScreen)
     }
 })
 sprites.onOverlap(SpriteKind.AiEnemy, SpriteKind.Crate, function (sprite, otherSprite) {
@@ -711,7 +752,7 @@ sprites.onOverlap(SpriteKind.AiEnemy, SpriteKind.Crate, function (sprite, otherS
     sprite.setVelocity(0, 202)
 })
 function Enemy_Maker () {
-    if (Math.percentChance(99)) {
+    if (Math.percentChance(0)) {
         AI_enemy = sprites.create(img`
             . . . . . . . . . . . . . . . . 
             . . . . . . . . . . . . . . . . 
@@ -732,7 +773,7 @@ function Enemy_Maker () {
             `, SpriteKind.AiEnemy)
         tiles.placeOnTile(AI_enemy, tiles.getTileLocation(randint(0, 44), 0))
         AI_enemy.setVelocity(0, 60)
-    } else if (Math.percentChance(75)) {
+    } else if (Math.percentChance(100)) {
         Basic_Enemy = sprites.create(img`
             . . . . . . . . . . . . . . . . 
             . . . . . . . . . . . . . . . . 
@@ -764,21 +805,36 @@ let statusbar: StatusBarSprite = null
 let Ammo = 0
 let Direction = ""
 let textSprite: TextSprite = null
+let InGamePoints = 0
 let gameStarted = false
 let Crouch = false
 let Delay_Actived = false
 let Delay = 0
 let Game_Over = false
+let Total_Points = 0
 let mySprite : Sprite = null
+if (blockSettings.exists("Total Points")) {
+    Total_Points = blockSettings.readNumber("Total Points")
+} else if (!(blockSettings.exists("Total Points"))) {
+    Total_Points = 0
+    blockSettings.writeNumber("Total Points", 0)
+}
 Game_Over = false
 Delay = 0
 Delay_Actived = false
 Crouch = false
 gameStarted = false
-blockMenu.showMenu(["PLAY", "INFORMATION"], MenuStyle.List, MenuLocation.BottomHalf)
+InGamePoints = blockSettings.readNumber("Total Points") / 5
+blockMenu.showMenu(["PLAY", "INFORMATION", "CURRENT CURRENCY", "STORE"], MenuStyle.List, MenuLocation.BottomHalf)
 textSprite = textsprite.create("NEONITE", 0, 9)
 textSprite.setPosition(45, 15)
 blockMenu.setColors(9, 15)
+game.onUpdate(function () {
+    if (gameStarted) {
+        console.log(Total_Points)
+        console.log(blockSettings.readNumber("Total Points"))
+    }
+})
 game.onUpdate(function () {
     if (!(gameStarted)) {
         textSprite.setMaxFontHeight(12)
